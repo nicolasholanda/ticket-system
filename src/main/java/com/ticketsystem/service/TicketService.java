@@ -5,6 +5,8 @@ import com.ticketsystem.domain.SeatStatus;
 import com.ticketsystem.domain.Show;
 import com.ticketsystem.domain.Ticket;
 import com.ticketsystem.domain.Zone;
+import com.ticketsystem.exception.CapacityExceededException;
+import com.ticketsystem.exception.SeatNotAvailableException;
 import com.ticketsystem.repository.SeatRepository;
 import com.ticketsystem.repository.ShowRepository;
 import com.ticketsystem.repository.TicketRepository;
@@ -40,12 +42,12 @@ public class TicketService {
 
         long soldCount = ticketRepository.countByShowIdAndSeatZoneId(showId, zoneId);
         if (soldCount + seatIds.size() > zone.getCapacity()) {
-            throw new IllegalStateException("Purchase exceeds zone capacity for zone: " + zone.getName());
+            throw new CapacityExceededException("Purchase exceeds zone capacity for zone: " + zone.getName());
         }
 
         List<Seat> availableSeats = seatRepository.findByIdInAndStatus(seatIds, SeatStatus.AVAILABLE);
         if (availableSeats.size() != seatIds.size()) {
-            throw new IllegalStateException("One or more selected seats are not available");
+            throw new SeatNotAvailableException("One or more selected seats are not available");
         }
 
         for (Seat seat : availableSeats) {
